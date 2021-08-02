@@ -1,23 +1,46 @@
 const { request, response } = require('express');
+const bcrypt = require('bcryptjs');
 
-const usersGet = (req = request, res = response) => {
-    const { search, filter, collection } = req.query;
+const User = require('../models/user');
+
+const usersGet = async (req = request, res = response) => {
+    let { limit = 10, pagina = 1, orderby = 'asc' } = req.query;
+    const filter = { estado: true };
     // res.send({
     //     status: 200,
     //     message: 'Respuesta exitosa',
     //     data: { id: 1299912, cod: '2109B7SHU9810' }
     // });
-    res.status(200).json({
-        message: 'Respuesta exitosa GET',
-        data: { id: 1299912, cod: '2109B7SHU9810' }
-    });
-    // res.status(403).json({
-    //     message: 'Sin autorizacion',
-    //     data: null
-    // });
+
+    try {
+        let limite = isNaN(Number(limit)) ? 10 : Number(limit);
+        let page = isNaN(Number(pagina)) ? 1 : Number(pagina);
+        let desde = (page - 1) * limite
+        orderby = orderby.toLowerCase() === 'desc' ? -1 : +1;
+
+        const [users, total] = await Promise.all([
+            User.find(filter).skip(desde).limit(limite).sort({ _id: orderby }),
+            User.countDocuments(filter)
+        ]);
+
+        res.json({ message: 'Petición realizada con éxito', data: { users, total } });
+    } catch (e) {
+        console.log('ERROR user.controller => usersGet', e);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
 };
 
-const userGet = (req = request, res = response) => {
+const userGet = async (req = request, res = response) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+
+        res.json({ message: 'Respuesta exitosa', data: user })
+    } catch (e) {
+        console.log('ERROR in user.controller => userGet', e.message);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
     const { id } = req.params;
     res.status(200).json({
         message: 'Respuesta exitosa GET',
@@ -25,25 +48,47 @@ const userGet = (req = request, res = response) => {
     });
 };
 
-const userPost = (req = request, res = response) => {
-    const { name, lastname, age } = req.body;
-    res.status(201).json({
-        message: 'Respuesta exitosa POST',
-        data: {
-            id: Math.random().toString().slice(2),
-            name: name.toUpperCase(),
-            lastname: lastname.toUpperCase(),
-            age,
-        }
-    });
+const userPost = async (req = request, res = response) => {
+    try {
+
+        const { nombre, correo, password, rol } = req.body;
+        const user = new User({ nombre, correo, password, rol });
+
+        const salt = bcrypt.genSaltSync();
+        user.password = bcrypt.hashSync(password, salt);
+
+        await user.save();
+
+        res.status(201).json({ message: 'Usuario creado con éxito', data: user });
+    } catch (e) {
+        console.log("🚀 ~ file: user.controller.js ~ line 44 ~ userPost ~ e", e);
+        res.status(500).json({
+            message: 'Error del servidor',
+            data: null
+        });
+    }
 };
 
-const userPut = (req = request, res = response) => {
-    const { id } = req.params;
-    res.json({
-        message: 'Respuesta exitosa PUT',
-        data: { id, cod: '2109B7SHU9810' }
-    });
+const userPut = async (req = request, res = response) => {
+    try {
+        const { id } = req.params;
+        const { _id, password, google, correo, ...rest } = req.body;
+
+        if (password) {
+            const salt = bcrypt.genSaltSync();
+            rest.password = bcrypt.hashSync(password, salt);
+        }
+
+        const userStorage = await User.findOneAndUpdate({ _id: id }, rest);
+
+        return res.status(200).json({
+            message: 'Usuario actualizado con éxito',
+            data: userStorage
+        });
+    } catch (e) {
+        console.log("🚀 ~ file: user.controller.js ~ line 67 ~ userPut ~ e", e);
+        res.status(500).json({ message: 'Error del servidor', error: e.message })
+    }
 };
 
 const userPatch = (req = request, res = response) => {
@@ -53,7 +98,20 @@ const userPatch = (req = request, res = response) => {
     });
 };
 
-const userDelete = (req = request, res = response) => {
+const userDelete = async (req = request, res = response) => {
+    try {
+        const { id } = req.params;
+
+        // No se recomienda eliminar data
+        // const userDeleted = await User.findByIdAndDelete(id);
+
+        const userInactived = await User.findByIdAndUpdate(id, { estado: false });
+
+        res.json({ message: 'Usuario eliminado correctamente', data: userInactived });
+    } catch (e) {
+        console.log('ERROR in user.controller => userDelete', e.message);
+        res.status(500).json({ message: 'Error del servidor' })
+    }
     res.json({
         message: 'Respuesta exitosa DELETE',
         data: { id: 1299912, cod: '2109B7SHU9810' }

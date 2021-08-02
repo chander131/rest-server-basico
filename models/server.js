@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 
+const { dbConnection } = require('../db/config');
+
 // const userController = require('../routes/user.routes');
 
 class Server {
@@ -10,11 +12,18 @@ class Server {
         this.port = process.env.PORT;
         this.userRoutes = '/api/users';
 
+        // Conexion a DB
+        this.conectarDB();
+
         // Middlewares
         this.middlewares();
 
         // Rutas de mi aplicacion
         this.routes();
+    }
+
+    async conectarDB() {
+        await dbConnection();
     }
 
     middlewares() {
@@ -39,7 +48,7 @@ class Server {
             console.log('###############################################');
             console.log('###############################################');
             console.log('###############################################');
-            console.log(`### Server run in http://localhost:${this.port} ###`);
+            console.log(`########### Server run in port ${this.port} ###########`);
             console.log('###############################################');
             console.log('###############################################');
             console.log('###############################################');
