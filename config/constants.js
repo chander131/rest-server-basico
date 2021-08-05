@@ -1,3 +1,14 @@
 const API_VERSION = 'v1';
 
-module.exports = { API_VERSION };
+const ALLOWEDROLES = ['ADMIN_ROLE', 'VENTAS_ROLE'];
+const ADMIN_ROLE = 'ADMIN_ROLE';
+const VENTAS_ROLE = 'VENTAS_ROLE';
+const USER_ROLE = 'USER_ROLE';
+
+module.exports = {
+    API_VERSION,
+    ALLOWEDROLES,
+    ADMIN_ROLE,
+    VENTAS_ROLE,
+    USER_ROLE,
+};

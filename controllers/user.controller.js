@@ -101,6 +101,8 @@ const userPatch = (req = request, res = response) => {
 const userDelete = async (req = request, res = response) => {
     try {
         const { id } = req.params;
+        // esta propiedad se agrego en el middleware de validación del token
+        // const uid = req.uid;
 
         // No se recomienda eliminar data
         // const userDeleted = await User.findByIdAndDelete(id);
@@ -112,10 +114,6 @@ const userDelete = async (req = request, res = response) => {
         console.log('ERROR in user.controller => userDelete', e.message);
         res.status(500).json({ message: 'Error del servidor' })
     }
-    res.json({
-        message: 'Respuesta exitosa DELETE',
-        data: { id: 1299912, cod: '2109B7SHU9810' }
-    });
 };
 
 module.exports = {
