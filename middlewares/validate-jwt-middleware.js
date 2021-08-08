@@ -24,7 +24,7 @@ const validateJWT = async (req = request, res = response, next) => {
         next();
     } catch (e) {
         console.log('ERROR in validate-jwt-middleware => validateJWT', e);
-        res.status(401).json({ message: 'Token no valido' });
+        return res.status(401).json({ message: 'Token no valido' });
     }
 };
 

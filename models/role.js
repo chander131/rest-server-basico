@@ -8,4 +8,9 @@ const RoleSchema = Schema({
     },
 });
 
+RoleSchema.methods.toJSON = function () {
+    const { __v, ...role } = this.toObject();
+    return { ...role };
+};
+
 module.exports = model('Role', RoleSchema, 'Roles');

@@ -79,7 +79,7 @@ const userPut = async (req = request, res = response) => {
             rest.password = bcrypt.hashSync(password, salt);
         }
 
-        const userStorage = await User.findOneAndUpdate({ _id: id }, rest);
+        const userStorage = await User.findOneAndUpdate({ _id: id }, rest, { new: true });
 
         return res.status(200).json({
             message: 'Usuario actualizado con éxito',
@@ -107,7 +107,7 @@ const userDelete = async (req = request, res = response) => {
         // No se recomienda eliminar data
         // const userDeleted = await User.findByIdAndDelete(id);
 
-        const userInactived = await User.findByIdAndUpdate(id, { estado: false });
+        const userInactived = await User.findByIdAndUpdate(id, { estado: false }, { new: true });
 
         res.json({ message: 'Usuario eliminado correctamente', data: userInactived });
     } catch (e) {
