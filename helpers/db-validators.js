@@ -57,6 +57,13 @@ const existProductById = async (id = '') => {
     }
 };
 
+const validCollections = (collection = '', allowedCollections = []) => {
+    if (!allowedCollections.includes(collection.toLowerCase().trim())) {
+        throw new Error(`La colección: ${collection} no esta permitida - allowedCollections`);
+    }
+    return true;
+};
+
 module.exports = {
     esRolValido,
     validarEmail,
@@ -65,4 +72,5 @@ module.exports = {
     existCategoryById,
     existProduct,
     existProductById,
+    validCollections,
 };
